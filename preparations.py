@@ -2,7 +2,7 @@ import pandas as pd
 
 
 def read_database():
-    df = pd.read_csv("Documents/VS Code/fractions_medical_statistics/data.csv", sep=";")
+    df = pd.read_csv("data.csv")
 
     return df
 
@@ -13,7 +13,7 @@ def prepare_normalization(df):
     min_h1 = df['Hgb1'].min()
     max_h1 = df['Hgb1'].max()
 
-    return min_h0, max_h0, min_h1, max_h1
+    return min(min_h0, min_h1), max(max_h0, max_h1)
 
 
 def blood_separation(helper_df):
