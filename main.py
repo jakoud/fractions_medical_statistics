@@ -1,44 +1,11 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-
-
-def prepare_normalization(df):
-    min_h0 = df['Hgb0'].min()
-    max_h0 = df['Hgb0'].max()
-    min_h1 = df['Hgb1'].min()
-    max_h1 = df['Hgb1'].max()
-
-    return min_h0, max_h0, min_h1, max_h1
-
-
-def read_database():
-    df = pd.read_csv("/home/cyfronet/Downloads/data.csv")
-    colors = pd.read_csv("/home/cyfronet/Downloads/colors.csv", header=None).values.tolist()
-
-    return df, colors
-
-
-def blood_separation(helper_df):
-    blood_no = helper_df[helper_df["KrewStatus"] == 'KrewNo']
-    blood_post = helper_df[helper_df["KrewStatus"] == "KrewPost"]
-    blood_pre = helper_df[helper_df['KrewStatus'] == 'KrewPre']
-    blood_both = helper_df[helper_df['KrewStatus'] == 'KrewPrePost']
-    blood_rest = pd.concat([blood_pre, blood_both])
-
-    return blood_no, blood_post, blood_rest
-
-
-def fraction_types(df, column_name):
-    return sorted(list(set(df[column_name])))
-
-
-def normalization(dataframe, minimum, max):
-    return (dataframe - minimum) / (max - minimum)
+from preparations import prepare_normalization, blood_separation, normalization, fraction_types, dataframe_info, read_database
 
 
 def combined():
     fig, ax = plt.subplots()
-    df, colors = read_database()
+    df = read_database()
     ax.set_box_aspect(1)
     min_h0, max_h0, min_h1, max_h1 = prepare_normalization(df)
     krew_no, krew_post, krew_rest = blood_separation(df)
@@ -100,7 +67,7 @@ def single(fraction_type):
 
 def grid():
     fig, ax = plt.subplots()
-    df, colors = read_database()
+    df = read_database()
     min_h0, max_h0, min_h1, max_h1 = prepare_normalization(df)
     fractions = fraction_types(df, 'wzórLET')
 
@@ -134,6 +101,3 @@ def grid():
     fig.text(0.5, 0.04, 'Hgb0', ha='center')
     fig.text(0.04, 0.5, 'Hgb1', va='center', rotation='vertical')
     plt.show()
-
-
-combined()
