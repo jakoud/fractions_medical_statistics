@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-from preparations import prepare_normalization, blood_separation, normalization, fraction_types, read_database, dataframe_info
+from preparations import prepare_normalization, blood_separation, normalization, fraction_types, read_database
 import seaborn as sns
 
 
@@ -109,7 +109,14 @@ def histograms():
     df = read_database()
     krew_no, krew_post, krew_rest = blood_separation(df)
     df = pd.concat([krew_no, krew_post])
-    sns.histplot(df['Hgb1-Hgb0'], bins=20, kde=True)
+    fractions = fraction_types(df, 'wzórLET')
+
+    for value in range(len(fractions)):
+        helper_df = df[df['wzórLET'] == fractions[value]]
+        ax = sns.histplot(helper_df['Hgb1-Hgb0'], bins=20, kde=True, ax=plt.subplot(5, 4, value + 1))
+        plt.title(fractions[value], y=0)
+        ax.set(xlabel=None, ylabel=None)
+
     plt.show()
 
 
@@ -117,22 +124,52 @@ def boxplots():
     df = read_database()
     krew_no, krew_post, krew_rest = blood_separation(df)
     df = pd.concat([krew_no, krew_post])
-    ax = sns.boxplot(x="wzórLET", y="Hgb1-Hgb0", data=df, order=fraction_types(df, 'wzórLET'))
-    # Calculate number of obs per group & median to position labels
-    nobs = [str(len(df[df['wzórLET'] == fraction])) for fraction in fraction_types(df, 'wzórLET')]
-
-    # Add it to the plot
-    pos = range(len(nobs))
-    for tick, label in zip(pos, ax.get_xticklabels()):
-        ax.text(pos[tick],
-                -9.2,
-                nobs[tick],
-                horizontalalignment='center',
-                size='x-small',
-                color='b',
-                weight='semibold')
+    df1 = df[df['wzórLET'] == 'AA']
+    df2 = df[df['wzórDIG'] == 22]
+    df3 = df[df['wzórPQR'] == 'PP']
+    ax1 = sns.boxplot(x="wzórLET", y="Hgb1-Hgb0", data=df1, ax=plt.subplot(1, 3, 1))
+    ax1.set(ylim=(-8, 2))
+    ax1.text(0,
+             df1['Hgb1-Hgb0'].median() + 0.05,
+             str(len(df1)),
+             horizontalalignment='center',
+             size='small',
+             color='w',
+             weight='semibold')
+    ax2 = sns.boxplot(x="wzórDIG", y="Hgb1-Hgb0", data=df2, ax=plt.subplot(1, 3, 2))
+    ax2.set(ylim=(-8, 2))
+    ax2.text(0,
+             df2['Hgb1-Hgb0'].median() + 0.05,
+             str(len(df2)),
+             horizontalalignment='center',
+             size='small',
+             color='w',
+             weight='semibold')
+    ax3 = sns.boxplot(x="wzórPQR", y="Hgb1-Hgb0", data=df3, ax=plt.subplot(1, 3, 3))
+    ax3.set(ylim=(-8, 2))
+    ax3.text(0,
+             df3['Hgb1-Hgb0'].median() + 0.05,
+             str(len(df3)),
+             horizontalalignment='center',
+             size='small',
+             color='w',
+             weight='semibold')
 
     plt.show()
 
-df = read_database()
-dataframe_info(df)
+
+def angle():
+    df = read_database()
+    x = sorted(df['Kąt'])
+    y = []
+    for argument in x:
+        helper_df = df[df['Kąt'] == argument]
+        y.append(helper_df['Hgb1-Hgb0'].mean())
+
+    plt.xlabel("Fraction angle")
+    plt.ylabel("Mean value of Hgb1-Hgb0")
+    plt.title('KREW ALL')
+    plt.plot(x, y)
+    plt.show()
+
+angle()
